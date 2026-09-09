@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
+import java.util.Objects;
 
 /**
  * Chatbot Service
@@ -235,11 +236,11 @@ public class ChatbotService {
         String medicalProcedure = extractMedicalProcedure(request.getMessage());
         
         // Eksik bilgileri kontrol et
-        if (policyId == null && tcKimlikNo == null) {
+        if (Objects.isNull(policyId) && Objects.isNull(tcKimlikNo)) {
             return askForPolicyId(request, context);
         }
         
-        if (medicalProcedure == null) {
+        if (Objects.isNull(medicalProcedure)) {
             return askForMedicalProcedure(request, context);
         }
         
@@ -284,11 +285,11 @@ public class ChatbotService {
         String policyId = (String) context.getCollectedInfo().get("policyId");
         String medicalProcedure = extractMedicalProcedure(request.getMessage());
         
-        if (policyId == null) {
+        if (Objects.isNull(policyId)) {
             return askForPolicyId(request, context);
         }
         
-        if (medicalProcedure == null) {
+        if (Objects.isNull(medicalProcedure)) {
             return askForMedicalProcedure(request, context);
         }
         
@@ -325,7 +326,7 @@ public class ChatbotService {
         String policyId = (String) context.getCollectedInfo().get("policyId");
         String question = request.getMessage();
         
-        if (policyId == null) {
+        if (Objects.isNull(policyId)) {
             return askForPolicyId(request, context);
         }
         
@@ -356,11 +357,11 @@ public class ChatbotService {
         String policyId1 = (String) context.getCollectedInfo().get("policyId1");
         String policyId2 = (String) context.getCollectedInfo().get("policyId2");
         
-        if (policyId1 == null) {
+        if (Objects.isNull(policyId1)) {
             return askForPolicyId1(request, context);
         }
         
-        if (policyId2 == null) {
+        if (Objects.isNull(policyId2)) {
             return askForPolicyId2(request, context);
         }
         
@@ -513,18 +514,15 @@ public class ChatbotService {
      * Konuşma bağlamını al veya oluştur
      */
     private ConversationContext getOrCreateContext(ChatRequest request) {
-        String conversationId = request.getConversationId();
+        String conversationId = Optional.ofNullable(request.getConversationId())
+                .orElseGet(UUID::randomUUID);
         
-        if (conversationId == null) {
-            conversationId = UUID.randomUUID().toString();
-        }
-        
-        ConversationContext context = activeConversations.get(conversationId);
-        
-        if (context == null) {
-            context = ConversationContext.startConversation(conversationId, request.getUserId());
-            activeConversations.put(conversationId, context);
-        }
+        ConversationContext context = Optional.ofNullable(activeConversations.get(conversationId))
+                .orElseGet(() -> {
+                    ConversationContext newContext = ConversationContext.startConversation(conversationId, request.getUserId());
+                    activeConversations.put(conversationId, newContext);
+                    return newContext;
+                });
         
         context.setLastActivity(LocalDateTime.now());
         return context;
@@ -784,7 +782,7 @@ public class ChatbotService {
                 .context(response.getContext())
                 .build();
         
-        if (context.getMessageHistory() == null) {
+        if (Objects.isNull(context.getMessageHistory())) {
             context.setMessageHistory(new ArrayList<>());
         }
         

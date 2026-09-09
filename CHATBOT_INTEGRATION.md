@@ -576,37 +576,6 @@ CHATBOT_RATE_LIMIT=100
 
 ---
 
-## 📚 Mülakat Soruları
-
-### **Q: Chatbot neden AI kullanıyor?**
-**A:** 
-- Natural language understanding
-- Intent classification accuracy
-- Better user experience
-- Reduced manual work
-- Scalable support
-
-### **Q: REST API mi WebSocket mi?**
-**A:**
-- **REST API:** Tekil mesajlar, simple integration
-- **WebSocket:** Real-time chat, better UX
-- **Hybrid:** Her ikisi de desteklenir
-
-### **Q: Intent classification nasıl çalışır?**
-**A:**
-- AI-based: OpenAI ile intent classification
-- Rule-based: Pattern matching
-- Fallback: Rule-based if AI fails
-
-### **Q: Conversation state nasıl yönetiliyor?**
-**A:**
-- ConversationContext class
-- In-memory storage (Redis in production)
-- State tracking: ACTIVE, COMPLETED, EXPIRED
-- Message history preservation
-
----
-
 ## 🎓 Sonuç
 
 Chatbot entegrasyonu ile sigorta çalışanları:

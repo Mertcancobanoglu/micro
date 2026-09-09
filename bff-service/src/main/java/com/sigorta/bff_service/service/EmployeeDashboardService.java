@@ -13,6 +13,7 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.Objects;
 
 /**
  * Employee Dashboard Service
@@ -58,7 +59,7 @@ public class EmployeeDashboardService {
             // 1. Policy bilgilerini al
             Map<String, Object> policyData = getPolicyData(request.getPolicyId(), request.getPolicyNumber());
             
-            if (policyData == null) {
+            if (Objects.isNull(policyData)) {
                 return createNotFoundResponse();
             }
             
@@ -178,7 +179,7 @@ public class EmployeeDashboardService {
         try {
             Map<String, Object> policyData = getPolicyData(request.getPolicyId(), request.getPolicyNumber());
             
-            if (policyData == null) {
+            if (Objects.isNull(policyData)) {
                 return Map.of("error", "Policy not found");
             }
             
@@ -216,7 +217,7 @@ public class EmployeeDashboardService {
         try {
             Map<String, Object> policyData = getPolicyData(policyId, null);
             
-            if (policyData == null) {
+            if (Objects.isNull(policyData)) {
                 return Map.of("error", "Policy not found");
             }
             
@@ -257,7 +258,7 @@ public class EmployeeDashboardService {
             Map<String, Object> policy1 = getPolicyData(policyId1, null);
             Map<String, Object> policy2 = getPolicyData(policyId2, null);
             
-            if (policy1 == null || policy2 == null) {
+            if (Objects.isNull(policy1) || Objects.isNull(policy2)) {
                 return Map.of("error", "One or both policies not found");
             }
             
@@ -596,13 +597,16 @@ public class EmployeeDashboardService {
     }
     
     private BigDecimal getBigDecimal(Map<String, Object> map, String key) {
-        Object value = map.get(key);
-        if (value instanceof BigDecimal) {
-            return (BigDecimal) value;
-        } else if (value instanceof Number) {
-            return BigDecimal.valueOf(((Number) value).doubleValue());
-        }
-        return BigDecimal.ZERO;
+        return Optional.ofNullable(map.get(key))
+                .map(value -> {
+                    if (value instanceof BigDecimal) {
+                        return (BigDecimal) value;
+                    } else if (value instanceof Number) {
+                        return BigDecimal.valueOf(((Number) value).doubleValue());
+                    }
+                    return BigDecimal.ZERO;
+                })
+                .orElse(BigDecimal.ZERO);
     }
     
     // --- Document Recommendation Methods ---

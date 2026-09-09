@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Konuşma Bağlamı DTO
@@ -139,7 +140,7 @@ public class ConversationContext {
      * Bilgi ekleme
      */
     public void addCollectedInfo(String key, Object value) {
-        if (this.collectedInfo == null) {
+        if (Objects.isNull(this.collectedInfo)) {
             this.collectedInfo = new HashMap<>();
         }
         this.collectedInfo.put(key, value);

@@ -15,6 +15,7 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -61,7 +62,7 @@ public class ChatbotController {
         log.info("REST API chatbot message: {}", request.getMessage());
         
         // Conversation ID yoksa oluştur
-        if (request.getConversationId() == null) {
+        if (Objects.isNull(request.getConversationId())) {
             request.setConversationId(UUID.randomUUID().toString());
         }
         
@@ -151,7 +152,7 @@ public class ChatbotController {
         log.info("WebSocket chatbot message: {}", request.getMessage());
         
         // Conversation ID yoksa oluştur
-        if (request.getConversationId() == null) {
+        if (Objects.isNull(request.getConversationId())) {
             request.setConversationId(UUID.randomUUID().toString());
         }
         

@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Authentication Controller
@@ -46,7 +47,7 @@ public class AuthController {
         String username = credentials.get("username");
         String password = credentials.get("password");
 
-        if (username == null || password == null) {
+        if (Objects.isNull(username) || Objects.isNull(password)) {
             return ResponseEntity.badRequest().body("Username and password are required");
         }
 
@@ -69,7 +70,7 @@ public class AuthController {
      */
     @PostMapping("/validate")
     public ResponseEntity<?> validateToken(@RequestHeader("Authorization") String authHeader) {
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        if (Objects.isNull(authHeader) || !authHeader.startsWith("Bearer ")) {
             return ResponseEntity.badRequest().body("Invalid token format");
         }
 

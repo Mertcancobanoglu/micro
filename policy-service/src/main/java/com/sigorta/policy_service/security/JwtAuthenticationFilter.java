@@ -13,6 +13,8 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import java.util.Objects;
+
 import java.io.IOException;
 import java.util.Collections;
 
@@ -40,7 +42,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         }
 
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+        if (Objects.nonNull(username) && Objects.isNull(SecurityContextHolder.getContext().getAuthentication())) {
             if (jwtUtil.validateToken(jwt, username)) {
                 String role = jwtUtil.extractRole(jwt);
                 UsernamePasswordAuthenticationToken authenticationToken =

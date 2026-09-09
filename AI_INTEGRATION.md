@@ -763,46 +763,6 @@ claim.setEstimatedPayment(payment.getEstimatedAmount());
 
 ---
 
-## 📚 Mülakat Soruları ve Cevapları
-
-### **Q: AI entegrasyonu neden gerekli?**
-**A:** 
-- Otomatik tıbbi kodlama: Manuel hataları azaltır
-- Fraud detection: Şüpheli hasarları erken tespit eder
-- Ödeme tahmini: Daha hızlı ve tutarlı hesaplama
-- Customer support: 7/24 destek sağlar
-- Cost reduction: Manuel iş yükünü azaltır
-
-### **Q: AI çökerse ne olur?**
-**A:**
-- Fallback logic devreye girer
-- Rule-based sistem devralır
-- Circuit breaker ile service degradation
-- Error handling ve notification
-
-### **Q: Data privacy nasıl sağlanır?**
-**A:**
-- PII data maskeleme
-- Local LLM kullanımı (özel data için)
-- GDPR compliant deployment (Azure OpenAI)
-- Data encryption in transit
-
-### **Q: Cost nasıl kontrol edilir?**
-**A:**
-- Rate limiting (max 10 req/min)
-- Caching (duplicate requests)
-- Token optimization (prompt kısaltma)
-- Cost tracking ve monitoring
-- Fallback on high cost
-
-### **Q: Local LLM mi cloud LLM mi?**
-**A:**
-- **Local:** Privacy-critical, development, testing
-- **Cloud:** Production, higher performance, scalability
-- **Hybrid:** Sensitive data local, general data cloud
-
----
-
 ## 🎓 Sonuç
 
 AI entegrasyonu sağlık sigortası hasar yönetiminde büyük fayda sağlar:

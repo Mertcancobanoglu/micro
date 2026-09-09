@@ -612,40 +612,6 @@ AI_RATE_LIMIT=10
 
 ---
 
-## 📚 Mülakat Soruları
-
-### **Q: Çalışan dashboard'ı neden AI kullanıyor?**
-**A:** 
-- Hızlı ve doğru policy validasyon
-- Karmaşık tıbbi terimleri anlama
-- Otomatik doküman önerisi
-- Cost calculation accuracy
-- Employee productivity increase
-
-### **Q: AI çökerse ne olur?**
-**A:**
-- Rule-based fallback devreye girer
-- System continues to work
-- Slightly lower accuracy but functional
-- Error monitoring ve notification
-
-### **Q: Data privacy nasıl sağlanır?**
-**A:**
-- TC kimlik no maskeleme
-- Sensitive data filtering
-- Local LLM option for sensitive data
-- GDPR compliant deployment
-
-### **Q: Çalışanları nasıl eğitiriz?**
-**A:**
-- Interactive tutorials
-- Live AI feedback
-- Example scenarios
-- Performance metrics
-- Ongoing support
-
----
-
 ## 🎓 Sonuç
 
 Employee dashboard ile sigorta çalışanları:
