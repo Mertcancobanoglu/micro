@@ -2,9 +2,11 @@ package com.sigorta.bff_service.service;
 
 import com.sigorta.bff_service.dto.PolicyValidationRequest;
 import com.sigorta.bff_service.dto.PolicyValidationResponse;
+import com.sigorta.bff_service.events.DashboardInsightEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -33,6 +35,7 @@ import java.util.Objects;
 public class EmployeeDashboardService {
     
     private final RestTemplate restTemplate;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
     
     @Value("${ai.enabled:false}")
     private boolean aiEnabled;
@@ -64,11 +67,21 @@ public class EmployeeDashboardService {
             }
             
             // 2. AI veya rule-based analysis
+            PolicyValidationResponse response;
+            String analysisSource;
+            
             if (aiEnabled) {
-                return aiBasedValidation(request, policyData);
+                response = aiBasedValidation(request, policyData);
+                analysisSource = "AI";
             } else {
-                return ruleBasedValidation(request, policyData);
+                response = ruleBasedValidation(request, policyData);
+                analysisSource = "RULE_BASED";
             }
+            
+            // 3. Kafka event gönder - analytics için
+            publishDashboardInsightEvent("VALIDATION", request, response.getDecision(), analysisSource);
+            
+            return response;
             
         } catch (Exception e) {
             log.error("Error in policy validation", e);
@@ -753,5 +766,39 @@ public class EmployeeDashboardService {
                 "cost_per_coverage_2",
                         getBigDecimal(policy2, "annualPremium").divide(getBigDecimal(policy2, "coverageLimit"), 2, RoundingMode.HALF_UP)
         );
+    }
+    
+    /**
+     * Dashboard Insight Event'i Kafka'ya gönderir
+     * 
+     * Analytics için Kafka event'i yayınlar:
+     * - dashboard.insight topic'ine gönderir
+     * - Analytics service bunu dinler
+     * - Kullanıcı davranışlarını takip eder
+     * 
+     * @param actionType Action tipi (VALIDATION, RECOMMENDATION, QUICK_CHECK)
+     * @param request Policy validation request
+     * @param result Sonuç (COVERED, NOT_COVERED, PARTIALLY_COVERED)
+     * @param analysisSource Analiz kaynağı (AI, RULE_BASED)
+     */
+    private void publishDashboardInsightEvent(String actionType, PolicyValidationRequest request, String result, String analysisSource) {
+        try {
+            DashboardInsightEvent event = DashboardInsightEvent.builder()
+                    .eventId(UUID.randomUUID())
+                    .userId("employee-" + UUID.randomUUID()) // JWT'den alınmalı
+                    .actionType(actionType)
+                    .policyId(request.getPolicyId())
+                    .policyNumber(request.getPolicyNumber())
+                    .result(result)
+                    .analysisSource(analysisSource)
+                    .timestamp(LocalDateTime.now())
+                    .correlationId(UUID.randomUUID().toString())
+                    .build();
+            
+            kafkaTemplate.send("dashboard.insight", event.getEventId().toString(), event);
+            log.info("Dashboard insight event published to Kafka for action: {}", actionType);
+        } catch (Exception e) {
+            log.error("Error publishing dashboard insight event", e);
+        }
     }
 }

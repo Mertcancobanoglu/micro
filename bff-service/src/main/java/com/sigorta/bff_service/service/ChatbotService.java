@@ -1,9 +1,11 @@
 package com.sigorta.bff_service.service;
 
 import com.sigorta.bff_service.dto.*;
+import com.sigorta.bff_service.events.ChatbotMessageEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -32,6 +34,7 @@ import java.util.Objects;
 public class ChatbotService {
     
     private final EmployeeDashboardService employeeDashboardService;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
     
     @Value("${ai.enabled:false}")
     private boolean aiEnabled;
@@ -121,6 +124,9 @@ public class ChatbotService {
             
             // 6. Konuşma geçmişine ekle
             addToConversationHistory(context, request, response);
+            
+            // 7. Kafka event gönder - analytics için
+            publishChatbotMessageEvent(request, response, intentResult.getIntent());
             
             return response;
             
@@ -801,6 +807,41 @@ public class ChatbotService {
                 .errorMessage(errorMessage)
                 .timestamp(System.currentTimeMillis())
                 .build();
+    }
+    
+    /**
+     * Chatbot Message Event'i Kafka'ya gönderir
+     * 
+     * Analytics için Kafka event'i yayınlar:
+     * - chatbot.message topic'ine gönderir
+     * - Analytics service bunu dinler
+     * - Kullanıcı davranışlarını takip eder
+     * 
+     * @param request Chat request
+     * @param response Chat response
+     * @param intent Classified intent
+     */
+    private void publishChatbotMessageEvent(ChatRequest request, ChatResponse response, String intent) {
+        try {
+            ChatbotMessageEvent event = ChatbotMessageEvent.builder()
+                    .conversationId(UUID.fromString(request.getConversationId()))
+                    .userId(request.getUserId())
+                    .message(request.getMessage())
+                    .intent(intent)
+                    .response(response.getMessage())
+                    .timestamp(LocalDateTime.now())
+                    .correlationId(request.getConversationId())
+                    .metadata(Map.of(
+                            "responseType", response.getResponseType(),
+                            "status", response.getStatus()
+                    ))
+                    .build();
+            
+            kafkaTemplate.send("chatbot.message", request.getConversationId(), event);
+            log.info("Chatbot message event published to Kafka for conversation: {}", request.getConversationId());
+        } catch (Exception e) {
+            log.error("Error publishing chatbot message event", e);
+        }
     }
     
     /**

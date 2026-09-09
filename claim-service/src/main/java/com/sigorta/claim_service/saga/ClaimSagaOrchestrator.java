@@ -140,6 +140,10 @@ public class ClaimSagaOrchestrator {
 
         log.info("Claim {} approved with amount {}", claim.getClaimNumber(), approvedAmount);
 
+        // Kafka event gönder - claim güncellendi
+        kafkaTemplate.send("claim.updated", claim.getClaimNumber(), 
+                buildClaimUpdatedEvent(claim));
+
         kafkaTemplate.send(CLAIM_APPROVED_TOPIC, claim.getClaimNumber(), 
                 buildClaimEvent(claim, "APPROVED"));
     }
@@ -162,6 +166,10 @@ public class ClaimSagaOrchestrator {
 
         kafkaTemplate.send(CLAIM_REJECTED_TOPIC, claim.getClaimNumber(), 
                 buildClaimEvent(claim, "REJECTED"));
+        
+        // Kafka event gönder - claim güncellendi
+        kafkaTemplate.send("claim.updated", claim.getClaimNumber(), 
+                buildClaimUpdatedEvent(claim));
     }
 
     /**
@@ -177,6 +185,28 @@ public class ClaimSagaOrchestrator {
                 .eventType(eventType)
                 .claimedAmount(claim.getClaimedAmount())
                 .timestamp(LocalDateTime.now())
+                .correlationId(claim.getClaimNumber())
+                .build();
+    }
+    
+    /**
+     * Claim Updated Event Oluşturma
+     * 
+     * BFF service'e güncelleme notification'ı için:
+     * - claim.updated topic'ine event gönderir
+     * - BFF bunu dinler ve WebSocket ile frontend'e gönderir
+     * 
+     * @param claim Hasar objesi
+     * @return ClaimUpdatedEvent
+     */
+    private com.sigorta.claim_service.saga.events.ClaimUpdatedEvent buildClaimUpdatedEvent(Claim claim) {
+        return com.sigorta.claim_service.saga.events.ClaimUpdatedEvent.builder()
+                .claimId(claim.getId())
+                .claimNumber(claim.getClaimNumber())
+                .status(claim.getStatus().name())
+                .approvedAmount(claim.getApprovedAmount())
+                .customerPayment(claim.getClaimedAmount().subtract(claim.getApprovedAmount()))
+                .updatedAt(LocalDateTime.now())
                 .correlationId(claim.getClaimNumber())
                 .build();
     }

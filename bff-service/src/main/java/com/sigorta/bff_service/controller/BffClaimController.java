@@ -1,13 +1,16 @@
 package com.sigorta.bff_service.controller;
 
+import com.sigorta.bff_service.events.ClaimUpdatedEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * BFF Claim Controller (Backend for Frontend - Hasar Yönetim API Gateway)
@@ -47,6 +50,7 @@ import java.util.Map;
 public class BffClaimController {
 
     private final RestTemplate restTemplate;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
     private static final String CLAIM_SERVICE_URL = "http://localhost:8081/api/claims";
 
     /**
@@ -193,11 +197,42 @@ public class BffClaimController {
         try {
             String url = CLAIM_SERVICE_URL + "/" + id + "/status";
             restTemplate.patchForObject(url, status, Object.class);
+            
+            // Kafka event gönder - hasar güncellendi
+            publishClaimUpdatedEvent(id, status.get("status"));
+            
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             log.error("Error updating claim status", e);
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                     .body(Map.of("error", "Claim service unavailable"));
+        }
+    }
+    
+    /**
+     * Hasar güncelleme event'i Kafka'ya gönderir
+     * 
+     * Real-time notification için Kafka event'i yayınlar:
+     * - claim.updated topic'ine gönderir
+     * - BFF KafkaEventListener bunu dinler
+     * - WebSocket üzerinden frontend'e notification gönderir
+     * 
+     * @param claimId Hasar ID'si
+     * @param status Yeni durum
+     */
+    private void publishClaimUpdatedEvent(String claimId, String status) {
+        try {
+            ClaimUpdatedEvent event = ClaimUpdatedEvent.builder()
+                    .claimId(UUID.fromString(claimId))
+                    .status(status)
+                    .updatedAt(LocalDateTime.now())
+                    .correlationId(UUID.randomUUID().toString())
+                    .build();
+            
+            kafkaTemplate.send("claim.updated", claimId, event);
+            log.info("Claim updated event published to Kafka for claim: {}", claimId);
+        } catch (Exception e) {
+            log.error("Error publishing claim updated event", e);
         }
     }
 }
