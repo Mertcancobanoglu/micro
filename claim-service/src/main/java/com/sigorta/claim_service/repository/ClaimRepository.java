@@ -87,6 +87,14 @@ public interface ClaimRepository extends JpaRepository<Claim, UUID> {
     List<Claim> findByReportedByOrderByReportDateDesc(String reportedBy);
 
     /**
+     * Raporlayan kişiye göre hasarları bulma
+     * 
+     * @param reportedBy Raporlayan kişinin kullanıcı adı
+     * @return Hasar listesi
+     */
+    List<Claim> findByReportedBy(String reportedBy);
+
+    /**
      * Tarih aralığına göre hasarları bulma
      * 
      * @param startDate Başlangıç tarihi

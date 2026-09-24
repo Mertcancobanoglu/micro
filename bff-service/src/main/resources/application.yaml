@@ -4,7 +4,7 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/bff_db
     username: postgres
-    password: postgres
+    password: kralex10
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:

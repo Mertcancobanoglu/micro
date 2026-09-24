@@ -9,6 +9,8 @@ import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 
+import java.util.UUID;
+
 /**
  * Kafka Event Listener
  * 

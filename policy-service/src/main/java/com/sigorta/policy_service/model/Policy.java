@@ -101,6 +101,9 @@ public class Policy {
     private BigDecimal coverageLimit;
 
     @Column(nullable = false)
+    private BigDecimal usedCoverage;
+
+    @Column(nullable = false)
     private BigDecimal deductible;
 
     @Column(nullable = false)

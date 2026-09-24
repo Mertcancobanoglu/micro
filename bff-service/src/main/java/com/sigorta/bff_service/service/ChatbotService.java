@@ -2,6 +2,9 @@ package com.sigorta.bff_service.service;
 
 import com.sigorta.bff_service.dto.*;
 import com.sigorta.bff_service.events.ChatbotMessageEvent;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

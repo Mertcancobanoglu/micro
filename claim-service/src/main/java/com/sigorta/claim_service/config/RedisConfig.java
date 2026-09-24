@@ -10,7 +10,7 @@ import org.springframework.data.redis.serializer.RedisSerializationContext;
 import java.time.Duration;
 
 @Configuration
-@EnableCaching
+// @EnableCaching // CacheManager bean tanımlanmadığı için geçici olarak devre dışı
 public class RedisConfig {
 
     @Bean
