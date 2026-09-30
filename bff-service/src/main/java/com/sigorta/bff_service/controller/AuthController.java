@@ -37,6 +37,27 @@ public class AuthController {
     private final JwtUtil jwtUtil;
 
     /**
+     * Local token endpoint (Development için)
+     * 
+     * @param username Opsiyonel username (default: localUser)
+     * @return JWT token
+     */
+    @GetMapping("/local-token")
+    public ResponseEntity<?> getLocalToken(@RequestParam(defaultValue = "localUser") String username) {
+        String role = determineUserRole(username);
+        String token = jwtUtil.generateToken(username, role);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("token", token);
+        response.put("type", "Bearer");
+        response.put("username", username);
+        response.put("role", role);
+        response.put("message", "Development token - Production kullanmayın!");
+
+        return ResponseEntity.ok(response);
+    }
+
+    /**
      * Kullanıcı login işlemi
      * 
      * @param credentials username ve password içeren map

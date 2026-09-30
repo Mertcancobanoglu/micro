@@ -6,6 +6,7 @@ import com.sigorta.bff_service.events.DashboardInsightEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -13,6 +14,7 @@ import org.springframework.web.client.RestTemplate;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.Objects;
@@ -33,18 +35,21 @@ import java.util.Objects;
 @RequiredArgsConstructor
 @Slf4j
 public class EmployeeDashboardService {
-    
+
     private final RestTemplate restTemplate;
     private final KafkaTemplate<String, Object> kafkaTemplate;
-    
+
     @Value("${ai.enabled:false}")
     private boolean aiEnabled;
-    
+
     @Value("${ai.model:gpt-4}")
     private String aiModel;
-    
-    private static final String POLICY_SERVICE_URL = "http://localhost:8082/api/policies";
-    private static final String CLAIM_SERVICE_URL = "http://localhost:8081/api/claims";
+
+    @Value("${downstream.policy-service.url}")
+    private String policyServiceUrl;
+
+    @Value("${downstream.claim-service.url}")
+    private String claimServiceUrl;
     
     /**
      * Poliçe Validasyon
@@ -295,8 +300,8 @@ public class EmployeeDashboardService {
     private Map<String, Object> getPolicyData(String policyId, String policyNumber) {
         try {
             String url = policyId != null ? 
-                    POLICY_SERVICE_URL + "/" + policyId :
-                    POLICY_SERVICE_URL + "/number/" + policyNumber;
+                    policyServiceUrl + "/api/policies/" + policyId :
+                    policyServiceUrl + "/api/policies/number/" + policyNumber;
             
             ResponseEntity<Map> response = restTemplate.getForEntity(url, Map.class);
             return response.getBody();
@@ -685,14 +690,10 @@ public class EmployeeDashboardService {
     
     private List<String> buildDocumentNotes(PolicyValidationRequest request, String policyType) {
         List<String> notes = new ArrayList<>();
-        
-        if (isEmergency) {
-            notes.add("Acil durum belgesi en geç 48 saat içinde sunulmalı");
-        }
-        
-        notes.add("Fatura resmi kaşe ve imzalı olmalı");
-        notes.add("Hasta raporu doktor imzalı olmalı");
-        
+
+        boolean isEmergency = request.getIsEmergency() != null && request.getIsEmergency();
+        notes.add("Acil durum belgesi en geç 48 saat içinde sunulmalı");
+
         return notes;
     }
     

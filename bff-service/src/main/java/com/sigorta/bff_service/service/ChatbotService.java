@@ -331,24 +331,28 @@ public class ChatbotService {
      */
     private ChatResponse handleQuickCheck(ChatRequest request, ConversationContext context) {
         log.info("Handling quick check intent");
-        
+
         String policyId = (String) context.getCollectedInfo().get("policyId");
         String question = request.getMessage();
-        
+
         if (Objects.isNull(policyId)) {
             return askForPolicyId(request, context);
         }
-        
-        Map<String, String> quickCheckResponse = 
+
+        // ✅ Değişken tipi Map<String, Object> olarak güncellendi:
+        Map<String, String> quickCheckResponse =
                 employeeDashboardService.quickCheck(question, policyId);
-        
+
         String botMessage = String.format("🤖 %s", quickCheckResponse.get("answer"));
-        
+
+// 2. Map<String, Object> tipine cast/dönüştürme yap
+        Map<String, Object> dataMap = new HashMap<>(quickCheckResponse);
+
         return ChatResponse.builder()
                 .message(botMessage)
                 .responseType("TEXT")
                 .status("SUCCESS")
-                .data(quickCheckResponse)
+                .data(dataMap) // dataMap (Map<String, Object>) geçiliyor
                 .followUpQuestions(Arrays.asList(
                         "Diğer teminatlar",
                         "Policy detayları",
@@ -523,16 +527,17 @@ public class ChatbotService {
      * Konuşma bağlamını al veya oluştur
      */
     private ConversationContext getOrCreateContext(ChatRequest request) {
+        // 1. conversationId yoksa yeni bir String UUID üret
         String conversationId = Optional.ofNullable(request.getConversationId())
-                .orElseGet(UUID::randomUUID);
-        
-        ConversationContext context = Optional.ofNullable(activeConversations.get(conversationId))
-                .orElseGet(() -> {
-                    ConversationContext newContext = ConversationContext.startConversation(conversationId, request.getUserId());
-                    activeConversations.put(conversationId, newContext);
-                    return newContext;
-                });
-        
+                .filter(id -> !id.isBlank())
+                .orElseGet(() -> UUID.randomUUID().toString());
+
+        // 2. Map'te varsa getir, yoksa atomically oluştur ve Map'e koy
+        ConversationContext context = activeConversations.computeIfAbsent(conversationId, id ->
+                ConversationContext.startConversation(id, request.getUserId())
+        );
+
+        // 3. Son aktivite zamanını güncelle
         context.setLastActivity(LocalDateTime.now());
         return context;
     }
@@ -839,7 +844,7 @@ public class ChatbotService {
                             "status", response.getStatus()
                     ))
                     .build();
-            
+
             kafkaTemplate.send("chatbot.message", request.getConversationId(), event);
             log.info("Chatbot message event published to Kafka for conversation: {}", request.getConversationId());
         } catch (Exception e) {

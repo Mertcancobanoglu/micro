@@ -2,7 +2,7 @@ spring:
   application:
     name: bff-service
   datasource:
-    url: jdbc:postgresql://localhost:5432/bff_db
+    url: jdbc:postgresql://postgres:5432/bff_db
     username: postgres
     password: kralex10
     driver-class-name: org.postgresql.Driver
@@ -16,10 +16,10 @@ spring:
         format_sql: true
   data:
     redis:
-      host: localhost
+      host: redis
       port: 6379
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: kafka:9092
     consumer:
       group-id: bff-service-group
       auto-offset-reset: earliest
@@ -30,6 +30,13 @@ spring:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+# Downstream service URLs (Docker)
+downstream:
+  policy-service:
+    url: http://policy-service:8082
+  claim-service:
+    url: http://claim-service:8081
 
 server:
   port: 8080
@@ -68,3 +75,7 @@ logging:
 jwt:
   secret: mySecretKeyForHealthInsuranceSystem123456789
   expiration: 86400000
+
+ai:
+  enabled: false
+  model: gpt-4

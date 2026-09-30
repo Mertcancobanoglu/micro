@@ -150,7 +150,7 @@ public class BffClaimController {
      * @param claim Hasar bilgileri
      * @return Oluşturulan hasar veya hata mesajı
      */
-    @PostMapping
+    @PostMapping("/create")
     public ResponseEntity<?> createClaim(@RequestBody Object claim) {
         try {
             ResponseEntity<?> response = restTemplate.postForEntity(CLAIM_SERVICE_URL, claim, Object.class);
@@ -171,7 +171,7 @@ public class BffClaimController {
      * @param claim Güncellenecek hasar bilgileri
      * @return Başarı durumu veya hata mesajı
      */
-    @PutMapping("/{id}")
+    @PutMapping("/update/{id}")
     public ResponseEntity<?> updateClaim(@PathVariable String id, @RequestBody Object claim) {
         try {
             String url = CLAIM_SERVICE_URL + "/" + id;
@@ -193,7 +193,7 @@ public class BffClaimController {
      * @param status Yeni durum
      * @return Başarı durumu veya hata mesajı
      */
-    @PatchMapping("/{id}/status")
+    @PatchMapping("/update-status/{id}")
     public ResponseEntity<?> updateClaimStatus(@PathVariable String id, @RequestBody Map<String, String> status) {
         try {
             String url = CLAIM_SERVICE_URL + "/" + id + "/status";

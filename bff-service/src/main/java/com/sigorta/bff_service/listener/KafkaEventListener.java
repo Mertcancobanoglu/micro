@@ -9,6 +9,8 @@ import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
@@ -73,7 +75,7 @@ public class KafkaEventListener {
         } catch (Exception e) {
             log.error("Error processing claim updated event", e);
             if (ack != null) {
-                ack.nack();
+                ack.nack(Duration.ZERO);
             }
         }
     }
@@ -114,7 +116,7 @@ public class KafkaEventListener {
         } catch (Exception e) {
             log.error("Error processing policy updated event", e);
             if (ack != null) {
-                ack.nack();
+                ack.nack(Duration.ofSeconds(1));
             }
         }
     }

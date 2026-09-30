@@ -57,7 +57,7 @@ public class BffPolicyController {
         }
     }
 
-    @PostMapping
+    @PostMapping("/create")
     public ResponseEntity<?> createPolicy(@RequestBody Object policy) {
         try {
             ResponseEntity<?> response = restTemplate.postForEntity(POLICY_SERVICE_URL, policy, Object.class);
@@ -69,7 +69,7 @@ public class BffPolicyController {
         }
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/update/{id}")
     public ResponseEntity<?> updatePolicy(@PathVariable String id, @RequestBody Object policy) {
         try {
             String url = POLICY_SERVICE_URL + "/" + id;
@@ -82,7 +82,7 @@ public class BffPolicyController {
         }
     }
 
-    @PatchMapping("/{id}/status")
+    @PatchMapping("/update-status/{id}")
     public ResponseEntity<?> updatePolicyStatus(@PathVariable String id, @RequestBody Map<String, String> status) {
         try {
             String url = POLICY_SERVICE_URL + "/" + id + "/status";

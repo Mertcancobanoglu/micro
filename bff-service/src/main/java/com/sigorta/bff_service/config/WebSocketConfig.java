@@ -44,6 +44,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
         registry.enableSimpleBroker("/topic");
-        registry.setApplicationDestinationPrefix("/app");
+        // Spring Boot 4.x'te setApplicationDestinationPrefixes kullanılıyor
+        registry.setApplicationDestinationPrefixes("/app");
     }
 }
