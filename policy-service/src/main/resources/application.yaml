@@ -56,7 +56,7 @@ management:
 logging:
   level:
     com.sigorta.policy_service: DEBUG
-    org.springframework.kafka: DEBUG
+    org.springframework.kafka: INFO
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
   pattern:
@@ -68,3 +68,7 @@ logging:
 jwt:
   secret: mySecretKeyForHealthInsuranceSystem123456789
   expiration: 86400000
+
+data:
+  init:
+    enabled: true

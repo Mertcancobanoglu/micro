@@ -68,3 +68,7 @@ logging:
 jwt:
   secret: mySecretKeyForHealthInsuranceSystem123456789
   expiration: 86400000
+
+data:
+  init:
+    enabled: true
